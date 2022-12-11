@@ -1,0 +1,4 @@
+A project doing data visualization and linear regression. 
+Following this project the conclusion is that 
+(if we follow the same negative growth as the previous years)
+in year 2052, there would be no more honey production

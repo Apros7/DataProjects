@@ -1,0 +1,10 @@
+{
+    "manifest_version": 3,
+    "name": "A really simple extension",
+    "description": "Basic extension",
+    "version": "1.0",
+    "action": {
+        "default_popup": "hello.html",
+        "default_icon": "Icon.png"
+    }
+}

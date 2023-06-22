@@ -1,0 +1,16 @@
+{
+  "manifest_version": 3,
+  "name": "My Extension",
+  "description": "A simple extension with a text field and a button",
+  "version": "1.0",
+  "action": {
+    "default_popup": "mypage.html"
+  },
+  "permissions": [
+    "activeTab",
+    "contextMenus"
+  ],
+  "background": { 
+        "service_worker": "background.js"
+    }
+}

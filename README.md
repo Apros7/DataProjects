@@ -1,1 +1,1 @@
-A collection of some of the data visualization/analytics projects
+A collection of some data projects, simple google extensions & other random projects

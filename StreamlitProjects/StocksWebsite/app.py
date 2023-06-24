@@ -64,6 +64,14 @@ progress_bar.progress(100)
 
 st.divider()
 st.header("Key Metrics:")
+col1, col2 = st.columns(2)
+st.write("""
+Could be:
+- Variation
+- Average increase in price for last 6 months
+- Profit growth for 3 years
+- Revenue growth for 3 years
+""")
 
 st.divider()
 st.header("Final Scores:")

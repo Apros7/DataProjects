@@ -75,3 +75,17 @@ Could be:
 
 st.divider()
 st.header("Final Scores:")
+
+st.divider()
+st.header("How the scores are measured: ")
+st.write("""
+The stock gets higher score if:
+- The variation of the stock is low
+- The average growth per month is high
+- The company has had a high growth of both profit and revenue in the last 3 years.
+
+The stock gets a significantly penalty if:
+- The company has had a more than 5% decline in either profit or revenue
+
+This is all relative to the other chosen stock.
+""")

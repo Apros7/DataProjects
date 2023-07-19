@@ -2,15 +2,20 @@ import streamlit as st
 import random
 import matplotlib.pyplot as plt
 import pickle
+import datetime
+import copy
 
 levels = {
-        'Education': 10,
-        'Programming Skills': 10,
-        'Business Skills': 5,
+        'Education': 0,
+        'Programming Skills': 0,
+        'Business Skills': 0,
         'Momentum': 0,
-        'Health': 40,
-        'Sleep': 10
+        'Health': 20,
+        'Sleep': 10,
+        'Social Media Usage': 100,
     }
+
+history = {"Baseline": levels, "2023-07-17": levels, "2023-07-18": levels, "2023-07-19": levels}
 
 def generate_random_levels():
     return {
@@ -20,24 +25,34 @@ def generate_random_levels():
         'Momentum': random.randint(70, 80),
         'Health': random.randint(20, 50),
         'Sleep': random.randint(0, 10),
+        'Social Media Usage': 100,
     }
 
 def save_levels(levels):
     with open("levels.pkl", "wb") as f:
         pickle.dump(levels, f)
 
-save_levels(levels)
-
 def load_levels():
     with open("levels.pkl", "rb") as f:
         return pickle.load(f)
 
-def save_history():
-    pass
+def save_history(history):
+    with open("history.pkl", "wb") as f:
+        pickle.dump(history, f)
 
 def load_history():
     with open("history.pkl", "rb") as f:
         return pickle.load(f)
+
+def save_checks(checks):
+    with open("checks.pkl", "wb") as f:
+        pickle.dump(checks, f)
+
+def load_checks():
+    with open("checks.pkl", "rb") as f:
+        return pickle.load(f)
+
+save_history(history)
 
 def plot_skill_graph(skill_levels):
     skills = list(skill_levels.keys())
@@ -62,8 +77,6 @@ def generate_skill_progression():
 def plot_skill_time_graph(skill_levels):
     fig, ax = plt.subplots(figsize=(8, 6))
 
-    skill_levels = generate_skill_progression()
-
     for key in list(skill_levels.values())[0]:
         values = [level[key] for level in skill_levels.values()]
         ax.plot(range(len(values)), values, label=key)
@@ -77,39 +90,136 @@ def plot_skill_time_graph(skill_levels):
     step_size = len(time_points) // num_ticks
     x_ticks = time_points[::step_size]
 
-    time_labels = [f'Time {tp}' for tp in x_ticks]
-    ax.set_xticks(x_ticks)
+    ax.set_xticks(range(len(x_ticks)))
     ax.set_xticklabels(x_ticks)
     plt.xticks(rotation=45)
     ax.legend()
     st.pyplot(fig)
 
-# Main function to run the Streamlit app
+def level_up(text, key, skill_levels):
+    skill_levels[key] += 1
+    with open("reviews.csv") as f:
+        f.write(key, skill_levels[key], text)
+    return skill_levels
+
+def process_levels(skill_levels, checks):
+    print("BEFORE", skill_levels)
+    representative_key = ["Momentum", "Sleep", "Momentum", "Health", "Momentum", "Social Media Usage"]
+    values = [1, 1, 1, 1, 1, -1]
+    for key, check, value in zip(representative_key, checks, values):
+        print(key, value)
+        if check: skill_levels[key] += value
+        else: skill_levels[key] -= value
+    return adjust_levels(skill_levels)
+
+def adjust_levels(skill_levels): 
+    for k, v in skill_levels.items():
+        if v < 0: skill_levels[k] = 0
+        if v > 100: skill_levels[k] = 100
+    return skill_levels
+
+def save_skill_levels(skill_levels, date, history):
+    history[date] = skill_levels
+    save_history(history)
+
 def main():
     st.set_page_config(layout="wide")
     st.title('Game of Life - Skill Development')
 
-    # Generate random initial skill levels
-    skill_levels = load_levels()
+    history = load_history()
+    print("HISTORY BEFORE:", history)
+    checks = load_checks()
+    skill_levels = list(history.values())[-1]
 
-    # Display skill levels as bars
+    print("SKILL LEVELS: ", skill_levels)
+
     columns = st.columns(len(skill_levels))
     items = list(skill_levels.items())
     for i in range(len(items)):
         with columns[i]:
             skill, level = items[i]
-            st.subheader(skill)
+            st.markdown(f'<h3 style="font-size:20px">{skill}: {level}</h3>', unsafe_allow_html=True)
             st.progress(level)
 
     col1, col2 = st.columns(2)
     with col1:
         plot_skill_graph(skill_levels)
     with col2:
-        plot_skill_time_graph(skill_levels)
+        plot_skill_time_graph(history)
 
     st.divider()
 
     st.header("Daily habits:")
+
+    # Maybe only today
+    date = str(st.date_input("Please select the date you want to look at: "))
+    if date == list(history.keys())[-1]: skill_levels = list(history.values())[-2]
+
+    st.write("Please select which habits you did today. This will impact your levels.")
+
+    habits_lst = ["2 hours of work on grammatiktak", "8.5 hours in bed", "Wake up before 6 am", 
+                  "30 min of exercise", "30 min of reading", "Less than 2 hours on social media"]
+    habits = {habit: False for habit in habits_lst}
+
+    if date in checks:
+        habits = {habit: checks[date][i] for i, habit in enumerate(habits_lst)}
+
+    check_values = []
+    col1, col2, col3 = st.columns(3)
+    columns = [col1, col2, col3, col1, col2, col3]
+    for i, habit in enumerate(habits):
+        with columns[i]:
+            check_values.append(st.checkbox(habit, habits[habit]))
+
+    ## Center ##
+    save = st.button("Submit")
+    if save:
+        print("HISTORY BEFORE:", history)
+        checks[date] = check_values
+        save_checks(checks)
+        old_hist = copy.deepcopy(history )
+        # History is automatically updated, which is really weird
+        skill_levels = process_levels(skill_levels, check_values)
+        print("HISTORY", old_hist)
+        save_skill_levels(skill_levels, date, old_hist)
+
+    st.divider()
+
+    st.header("Level up:")
+    skill_to_level_up = st.selectbox("Choose which skill to level up:", list(skill_levels.keys()))
+
+    questions = {
+        'Education': ["Did you finish a school course (>100 hours)?"],
+        'Programming Skills': ["Did you read a programming book?", "Did you learn a new programming language?", "Did you finish a programming course?"],
+        'Business Skills': ["Did you finish a business course or book?", "Did you learn a new business releated skill?"],
+        'Momentum': [],
+        'Health': [],
+        'Sleep': [],
+        'Social Media Usage': [],
+    }
+
+    st.markdown(f'<h3 style="font-size:30px">Can you answer yes to any of these questions?</h3>', unsafe_allow_html=True)
+    related_questions = questions[skill_to_level_up]
+    if len(related_questions) == 0:
+        st.write("This skill cannot be leveled up...")
+    else:
+        columns = st.columns(len(related_questions))
+
+        for i in range(len(related_questions)):
+            with columns[i]:
+                st.markdown(f'<h3 style="font-size:20px">{related_questions[i]}</h3>', unsafe_allow_html=True)
+
+        yes_button = st.button("Yes")
+        no_button = st.button("No")
+        if yes_button and not no_button:
+            review = st.text_input("Please write a few lines on what you have achieved: ")
+            submit_button = st.button("Submit")
+            if submit_button:
+                # Does not work
+                print("HEY HEY")
+                level_up(review, skill_to_level_up, skill_levels)
+
+
 
 if __name__ == '__main__':
     main()

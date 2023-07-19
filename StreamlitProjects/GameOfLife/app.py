@@ -5,10 +5,16 @@ import pickle
 import datetime
 import copy
 
+st.set_page_config(layout="wide")
+
+# Education: Folkeskole +5, STX +5, Kurser på DTU +8
+# Programming skills: Books +2, Kurser +1, Online +2
+# Business skills: Books +5
+
 levels = {
-        'Education': 0,
-        'Programming Skills': 0,
-        'Business Skills': 0,
+        'Education': 18,
+        'Programming Skills': 5,
+        'Business Skills': 5,
         'Momentum': 0,
         'Health': 20,
         'Sleep': 10,
@@ -51,6 +57,8 @@ def save_checks(checks):
 def load_checks():
     with open("checks.pkl", "rb") as f:
         return pickle.load(f)
+
+#save_history(history)
 
 def plot_skill_graph(skill_levels):
     skills = list(skill_levels.keys())
@@ -119,7 +127,6 @@ def save_skill_levels(skill_levels, date, history):
     save_history(history)
 
 def main():
-    st.set_page_config(layout="wide")
     st.title('Game of Life - Skill Development')
 
     history = load_history()

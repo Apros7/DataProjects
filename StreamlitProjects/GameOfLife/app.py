@@ -52,8 +52,6 @@ def load_checks():
     with open("checks.pkl", "rb") as f:
         return pickle.load(f)
 
-save_history(history)
-
 def plot_skill_graph(skill_levels):
     skills = list(skill_levels.keys())
     levels = list(skill_levels.values())
@@ -103,11 +101,9 @@ def level_up(text, key, skill_levels):
     return skill_levels
 
 def process_levels(skill_levels, checks):
-    print("BEFORE", skill_levels)
     representative_key = ["Momentum", "Sleep", "Momentum", "Health", "Momentum", "Social Media Usage"]
     values = [1, 1, 1, 1, 1, -1]
     for key, check, value in zip(representative_key, checks, values):
-        print(key, value)
         if check: skill_levels[key] += value
         else: skill_levels[key] -= value
     return adjust_levels(skill_levels)
@@ -127,11 +123,8 @@ def main():
     st.title('Game of Life - Skill Development')
 
     history = load_history()
-    print("HISTORY BEFORE:", history)
     checks = load_checks()
     skill_levels = list(history.values())[-1]
-
-    print("SKILL LEVELS: ", skill_levels)
 
     columns = st.columns(len(skill_levels))
     items = list(skill_levels.items())
@@ -153,7 +146,9 @@ def main():
 
     # Maybe only today
     date = str(st.date_input("Please select the date you want to look at: "))
+    if date not in history: history[date] = skill_levels
     if date == list(history.keys())[-1]: skill_levels = list(history.values())[-2]
+    save_history(history)
 
     st.write("Please select which habits you did today. This will impact your levels.")
 
@@ -174,13 +169,11 @@ def main():
     ## Center ##
     save = st.button("Submit")
     if save:
-        print("HISTORY BEFORE:", history)
         checks[date] = check_values
         save_checks(checks)
-        old_hist = copy.deepcopy(history )
         # History is automatically updated, which is really weird
+        old_hist = copy.deepcopy(history )
         skill_levels = process_levels(skill_levels, check_values)
-        print("HISTORY", old_hist)
         save_skill_levels(skill_levels, date, old_hist)
 
     st.divider()

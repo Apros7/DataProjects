@@ -154,24 +154,24 @@ def main_goal_info():
         st.progress(1 - days_left_this_year/365)
         st.divider()
         st.markdown(f'<h3 style="font-size:18px;text-align:center">100 days wake up before 6 AM</h3>', unsafe_allow_html=True)
-        st.progress(main_goal_current_numbers[0]/main_goal_final_numbers[0])
+        st.progress(main_goal_current_numbers[1]/main_goal_final_numbers[1])
     with col2:
-        st.markdown(f'<h3 style="font-size:18px;text-align:center">5 goals to use GrammatikTAK!</h3>', unsafe_allow_html=True)
+        st.markdown(f'<h3 style="font-size:18px;text-align:center">5 schools to use GrammatikTAK!</h3>', unsafe_allow_html=True)
         st.progress(main_goal_current_numbers[0]/main_goal_final_numbers[0])
         st.divider()
         st.markdown(f'<h3 style="font-size:18px;text-align:center">400 hours on GrammatikTAK!</h3>', unsafe_allow_html=True)
-        st.progress(main_goal_current_numbers[0]/main_goal_final_numbers[0])
+        st.progress(main_goal_current_numbers[2]/main_goal_final_numbers[2])
     st.divider()
-    col1, col2 = st.columns(2)
-    options = ["GrammatikTAK customers", "Wake up before 6 AM", "Hours on GrammatikTAK!"]
+    col1, col2, col3 = st.columns(3)
+    options = ["Schools", "6 AM wake up", "Hours"]
     with col1: goal_to_update = st.selectbox("Select goal to update: ", options)
-    # should only allow for ints
-    with col2: number = st.number_input("What should be added to the current value?", value = 0, step = 1)
-    main_goal_current_numbers[options.index(goal_to_update)] += number
-    if [int(x) for x in main_goal_current_numbers] != prev_main_goal_numbers: st.experimental_rerun()
-    save_main_goal_number(main_goal_current_numbers)
-    # should reload by itself here
-    
+    with col2: number = st.number_input("Add to current value", value = 0, step = 1)
+    with col3: st.write(""); st.write(""); update = st.button("Update")
+    if update:
+        main_goal_current_numbers[options.index(goal_to_update)] += number
+        save_main_goal_number(main_goal_current_numbers)
+        st.experimental_rerun()
+
 def main():
     st.title('Game of Life - Skill Development')
 
@@ -223,7 +223,6 @@ def main():
         with columns[i]:
             check_values.append(st.checkbox(habit, habits[habit]))
 
-    ## Center ##
     save = st.button("Submit")
     if save:
         checks[date] = check_values
@@ -251,7 +250,7 @@ def main():
     st.markdown(f'<h3 style="font-size:30px">You can level up if you can answer yes to any of these questions: </h3>', unsafe_allow_html=True)
     related_questions = questions[skill_to_level_up]
     if len(related_questions) == 0:
-        st.write("This skill cannot be leveled up...")
+        st.write("This skill can only be leveled up through habits :-).")
     else:
         columns = st.columns(len(related_questions))
 

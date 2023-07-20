@@ -23,6 +23,12 @@ levels = {
 
 history = {"Baseline": levels, "2023-07-17": levels, "2023-07-18": levels, "2023-07-19": levels}
 
+def days_left_in_year():
+    current_date = datetime.date.today()
+    last_day_of_year = datetime.date(current_date.year + 1, 1, 1) - datetime.timedelta(days=1)
+    days_left = (last_day_of_year - current_date).days
+    return days_left
+
 def generate_random_levels():
     return {
         'Education': random.randint(0, 10),
@@ -58,9 +64,19 @@ def load_checks():
     with open("checks.pkl", "rb") as f:
         return pickle.load(f)
 
+def save_main_goal_number(numbers):
+    with open("main_goal_number.csv", "w") as f:
+        for number in numbers:
+            f.write(str(int(number)) + "\n")
+
+def load_main_goal_number():
+    return [int(x) for x in open("main_goal_number.csv", "r").readlines()]
+
 #save_history(history)
 
 def plot_skill_graph(skill_levels):
+    st.markdown(f'<h3 style="font-size:25px;text-align:center">Current skill levels:</h3>', unsafe_allow_html=True)
+
     skills = list(skill_levels.keys())
     levels = list(skill_levels.values())
 
@@ -68,7 +84,6 @@ def plot_skill_graph(skill_levels):
     ax.bar(skills, levels)
     #ax.set_xlabel('Skills')
     ax.set_ylabel('Levels')
-    ax.set_title('Current skill levels')
     ax.set_yticks([x for x in range(0, 101, 10)])
     plt.xticks(rotation=20)
     st.pyplot(fig)
@@ -81,15 +96,16 @@ def generate_skill_progression():
 
 # Function to plot the graph
 def plot_skill_time_graph(skill_levels):
+    st.markdown(f'<h3 style="font-size:25px;text-align:center">Skill Development over Time:</h3>', unsafe_allow_html=True)
+    
     fig, ax = plt.subplots(figsize=(8, 6))
 
     for key in list(skill_levels.values())[0]:
         values = [level[key] for level in skill_levels.values()]
         ax.plot(range(len(values)), values, label=key)
 
-    ax.set_xlabel('Time')
+    #ax.set_xlabel('Time')
     ax.set_ylabel('Levels')
-    ax.set_title('Skill Development over Time')
     
     time_points = list(skill_levels.keys())
     num_ticks = min(10, len(time_points)) 
@@ -98,7 +114,7 @@ def plot_skill_time_graph(skill_levels):
 
     ax.set_xticks(range(len(x_ticks)))
     ax.set_xticklabels(x_ticks)
-    plt.xticks(rotation=45)
+    plt.xticks(rotation=20)
     ax.legend()
     st.pyplot(fig)
 
@@ -126,6 +142,36 @@ def save_skill_levels(skill_levels, date, history):
     history[date] = skill_levels
     save_history(history)
 
+def main_goal_info():
+    days_left_this_year = days_left_in_year()
+    main_goal_current_numbers = load_main_goal_number()
+    prev_main_goal_numbers = main_goal_current_numbers.copy()
+    main_goal_final_numbers = [5, 100, 400]
+    st.markdown(f'<h3 style="font-size:25px;text-align:center">Main goal this year:</h3>', unsafe_allow_html=True)
+    col1, col2 = st.columns(2)
+    with col1: 
+        st.markdown(f'<h3 style="font-size:18px;text-align:center">{days_left_this_year} days left this year.</h3>', unsafe_allow_html=True)
+        st.progress(1 - days_left_this_year/365)
+        st.divider()
+        st.markdown(f'<h3 style="font-size:18px;text-align:center">100 days wake up before 6 AM</h3>', unsafe_allow_html=True)
+        st.progress(main_goal_current_numbers[0]/main_goal_final_numbers[0])
+    with col2:
+        st.markdown(f'<h3 style="font-size:18px;text-align:center">5 goals to use GrammatikTAK!</h3>', unsafe_allow_html=True)
+        st.progress(main_goal_current_numbers[0]/main_goal_final_numbers[0])
+        st.divider()
+        st.markdown(f'<h3 style="font-size:18px;text-align:center">400 hours on GrammatikTAK!</h3>', unsafe_allow_html=True)
+        st.progress(main_goal_current_numbers[0]/main_goal_final_numbers[0])
+    st.divider()
+    col1, col2 = st.columns(2)
+    options = ["GrammatikTAK customers", "Wake up before 6 AM", "Hours on GrammatikTAK!"]
+    with col1: goal_to_update = st.selectbox("Select goal to update: ", options)
+    # should only allow for ints
+    with col2: number = st.number_input("What should be added to the current value?", value = 0, step = 1)
+    main_goal_current_numbers[options.index(goal_to_update)] += number
+    if [int(x) for x in main_goal_current_numbers] != prev_main_goal_numbers: st.experimental_rerun()
+    save_main_goal_number(main_goal_current_numbers)
+    # should reload by itself here
+    
 def main():
     st.title('Game of Life - Skill Development')
 
@@ -141,10 +187,14 @@ def main():
             st.markdown(f'<h3 style="font-size:20px">{skill}: {level}</h3>', unsafe_allow_html=True)
             st.progress(level)
 
-    col1, col2 = st.columns(2)
+    st.divider()
+
+    col1, col2, col3 = st.columns(3)
     with col1:
-        plot_skill_graph(skill_levels)
+        main_goal_info()
     with col2:
+        plot_skill_graph(skill_levels)
+    with col3:
         plot_skill_time_graph(history)
 
     st.divider()
@@ -198,7 +248,7 @@ def main():
         'Social Media Usage': [],
     }
 
-    st.markdown(f'<h3 style="font-size:30px">Can you answer yes to any of these questions?</h3>', unsafe_allow_html=True)
+    st.markdown(f'<h3 style="font-size:30px">You can level up if you can answer yes to any of these questions: </h3>', unsafe_allow_html=True)
     related_questions = questions[skill_to_level_up]
     if len(related_questions) == 0:
         st.write("This skill cannot be leveled up...")
@@ -209,15 +259,10 @@ def main():
             with columns[i]:
                 st.markdown(f'<h3 style="font-size:20px">{related_questions[i]}</h3>', unsafe_allow_html=True)
 
-        yes_button = st.button("Yes")
-        no_button = st.button("No")
-        if yes_button and not no_button:
-            review = st.text_input("Please write a few lines on what you have achieved: ")
-            submit_button = st.button("Submit")
-            if submit_button:
-                # Does not work
-                print("HEY HEY")
-                level_up(review, skill_to_level_up, skill_levels)
+        review = st.text_input("Please write a few lines on what you have achieved: ")
+        submit_button = st.button("Level up")
+        if submit_button:
+            level_up(review, skill_to_level_up, skill_levels)
 
 
 

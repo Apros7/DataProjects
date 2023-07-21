@@ -145,9 +145,8 @@ def save_skill_levels(skill_levels, date, history):
 def main_goal_info():
     days_left_this_year = days_left_in_year()
     main_goal_current_numbers = load_main_goal_number()
-    prev_main_goal_numbers = main_goal_current_numbers.copy()
-    main_goal_final_numbers = [5, 100, 400]
-    st.markdown(f'<h3 style="font-size:25px;text-align:center">Main goal this year:</h3>', unsafe_allow_html=True)
+    main_goal_final_numbers = [5, 100, 600]
+    st.markdown(f'<h3 style="font-size:25px;text-align:center">Main goals this year:</h3>', unsafe_allow_html=True)
     col1, col2 = st.columns(2)
     with col1: 
         st.markdown(f'<h3 style="font-size:18px;text-align:center">{days_left_this_year} days left this year.</h3>', unsafe_allow_html=True)
@@ -159,7 +158,7 @@ def main_goal_info():
         st.markdown(f'<h3 style="font-size:18px;text-align:center">5 schools to use GrammatikTAK!</h3>', unsafe_allow_html=True)
         st.progress(main_goal_current_numbers[0]/main_goal_final_numbers[0])
         st.divider()
-        st.markdown(f'<h3 style="font-size:18px;text-align:center">400 hours on GrammatikTAK!</h3>', unsafe_allow_html=True)
+        st.markdown(f'<h3 style="font-size:18px;text-align:center">600 hours on GrammatikTAK!</h3>', unsafe_allow_html=True)
         st.progress(main_goal_current_numbers[2]/main_goal_final_numbers[2])
     st.divider()
     col1, col2, col3 = st.columns(3)
@@ -228,9 +227,10 @@ def main():
         checks[date] = check_values
         save_checks(checks)
         # History is automatically updated, which is really weird
-        old_hist = copy.deepcopy(history )
+        old_hist = copy.deepcopy(history)
         skill_levels = process_levels(skill_levels, check_values)
         save_skill_levels(skill_levels, date, old_hist)
+        st.experimental_rerun()
 
     st.divider()
 
@@ -261,7 +261,10 @@ def main():
         review = st.text_input("Please write a few lines on what you have achieved: ")
         submit_button = st.button("Level up")
         if submit_button:
-            level_up(review, skill_to_level_up, skill_levels)
+            old_hist = copy.deepcopy(history)
+            new_skill_levels = level_up(review, skill_to_level_up, skill_levels)
+            save_skill_levels(new_skill_levels, date, history)
+            st.experimental_rerun()
 
 
 

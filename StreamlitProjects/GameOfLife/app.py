@@ -82,7 +82,6 @@ def plot_skill_graph(skill_levels):
 
     fig, ax = plt.subplots(figsize=(8, 6))
     ax.bar(skills, levels)
-    #ax.set_xlabel('Skills')
     ax.set_ylabel('Levels')
     ax.set_yticks([x for x in range(0, 101, 10)])
     plt.xticks(rotation=20)
@@ -149,16 +148,16 @@ def main_goal_info():
     st.markdown(f'<h3 style="font-size:25px;text-align:center">Main goals this year:</h3>', unsafe_allow_html=True)
     col1, col2 = st.columns(2)
     with col1: 
-        st.markdown(f'<h3 style="font-size:18px;text-align:center">{days_left_this_year} days left this year.</h3>', unsafe_allow_html=True)
+        st.markdown(f'<h3 style="font-size:17px;text-align:center">{days_left_this_year} days left this year.</h3>', unsafe_allow_html=True)
         st.progress(1 - days_left_this_year/365)
         st.divider()
-        st.markdown(f'<h3 style="font-size:18px;text-align:center">100 days wake up before 6 AM</h3>', unsafe_allow_html=True)
+        st.markdown(f'<h3 style="font-size:17px;text-align:center">{main_goal_current_numbers[1]}/100 days wake up before 6 AM</h3>', unsafe_allow_html=True)
         st.progress(main_goal_current_numbers[1]/main_goal_final_numbers[1])
     with col2:
-        st.markdown(f'<h3 style="font-size:18px;text-align:center">5 schools to use GrammatikTAK!</h3>', unsafe_allow_html=True)
+        st.markdown(f'<h3 style="font-size:17px;text-align:center">{main_goal_current_numbers[0]}/5 schools to use GrammatikTAK!</h3>', unsafe_allow_html=True)
         st.progress(main_goal_current_numbers[0]/main_goal_final_numbers[0])
         st.divider()
-        st.markdown(f'<h3 style="font-size:18px;text-align:center">600 hours on GrammatikTAK!</h3>', unsafe_allow_html=True)
+        st.markdown(f'<h3 style="font-size:17px;text-align:center">{main_goal_current_numbers[2]}/600 hours on GrammatikTAK!</h3>', unsafe_allow_html=True)
         st.progress(main_goal_current_numbers[2]/main_goal_final_numbers[2])
     st.divider()
     col1, col2, col3 = st.columns(3)
@@ -265,8 +264,6 @@ def main():
             new_skill_levels = level_up(review, skill_to_level_up, skill_levels)
             save_skill_levels(new_skill_levels, date, history)
             st.experimental_rerun()
-
-
 
 if __name__ == '__main__':
     main()

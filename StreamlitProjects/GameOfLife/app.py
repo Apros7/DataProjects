@@ -108,8 +108,8 @@ def plot_skill_time_graph(skill_levels):
     
     time_points = list(skill_levels.keys())
     num_ticks = min(10, len(time_points)) 
-    step_size = len(time_points) // num_ticks
-    x_ticks = time_points[::step_size]
+    step_size = len(time_points) // num_ticks + 1
+    x_ticks = [point if i % step_size == 0 else None for i, point in enumerate(time_points)]
 
     ax.set_xticks(range(len(x_ticks)))
     ax.set_xticklabels(x_ticks)
@@ -125,10 +125,10 @@ def level_up(text, key, skill_levels):
 
 def process_levels(skill_levels, checks):
     representative_key = ["Momentum", "Sleep", "Momentum", "Health", "Momentum", "Social Media Usage"]
-    values = [1, 1, 1, 1, 1, -1]
+    values = [(1, -1), (1, -4), (1, -1), (1, -2), (1, -1), (1, -1)]
     for key, check, value in zip(representative_key, checks, values):
-        if check: skill_levels[key] += value
-        else: skill_levels[key] -= value
+        if check: skill_levels[key] += value[0]
+        else: skill_levels[key] += value[1]
     return adjust_levels(skill_levels)
 
 def adjust_levels(skill_levels): 

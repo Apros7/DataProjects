@@ -125,7 +125,7 @@ def level_up(text, key, skill_levels):
 
 def process_levels(skill_levels, checks):
     representative_key = ["Momentum", "Sleep", "Momentum", "Health", "Momentum", "Social Media Usage"]
-    values = [(1, -1), (1, -4), (1, -1), (1, -2), (1, -1), (1, -1)]
+    values = [(1, -1), (1, -4), (1, -1), (1, -2), (1, -1), (-1, 1)]
     for key, check, value in zip(representative_key, checks, values):
         if check: skill_levels[key] += value[0]
         else: skill_levels[key] += value[1]

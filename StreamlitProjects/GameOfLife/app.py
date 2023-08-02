@@ -72,8 +72,6 @@ def save_main_goal_number(numbers):
 def load_main_goal_number():
     return [int(x) for x in open("main_goal_number.csv", "r").readlines()]
 
-#save_history(history)
-
 def plot_skill_graph(skill_levels):
     st.markdown(f'<h3 style="font-size:25px;text-align:center">Current skill levels:</h3>', unsafe_allow_html=True)
 
@@ -129,7 +127,15 @@ def process_levels(skill_levels, checks):
     for key, check, value in zip(representative_key, checks, values):
         if check: skill_levels[key] += value[0]
         else: skill_levels[key] += value[1]
+    skill_levels = process_likelihood_of_success(skill_levels)
     return adjust_levels(skill_levels)
+
+def process_likelihood_of_success(skill_levels):
+    average = skill_levels["Sleep"] + skill_levels["Health"] + skill_levels["Momentum"] + 100 - skill_levels["Social Media Usage"]
+    average /= 4
+    likelihood = (average ** 2) / (100)
+    skill_levels["Likelihood of Success"] = likelihood
+    return skill_levels
 
 def adjust_levels(skill_levels): 
     for k, v in skill_levels.items():
@@ -177,13 +183,27 @@ def main():
     checks = load_checks()
     skill_levels = list(history.values())[-1]
 
-    columns = st.columns(len(skill_levels))
-    items = list(skill_levels.items())
-    for i in range(len(items)):
-        with columns[i]:
-            skill, level = items[i]
-            st.markdown(f'<h3 style="font-size:20px">{skill}: {level}</h3>', unsafe_allow_html=True)
-            st.progress(level)
+    col1, col2, col3 = st.columns(3)
+    with col1: 
+        columns = st.columns(len(skill_levels)//4)
+        items = list(skill_levels.items())[:4]
+        for i in range(len(items)):
+            with columns[i if i < len(skill_levels)//4 else i - len(skill_levels)//4]:
+                skill, level = items[i]
+                st.markdown(f'<h3 style="font-size:20px">{skill}: {level}</h3>', unsafe_allow_html=True)
+                st.progress(int(round(level, 0)))
+    with col2: 
+        columns = st.columns(len(skill_levels)//4)
+        items = list(skill_levels.items())[4:]
+        for i in range(len(items)):
+            with columns[i if i < len(skill_levels)//4 else i - len(skill_levels)//4]:
+                skill, level = items[i]
+                st.markdown(f'<h3 style="font-size:20px">{skill}: {round(level, 1)}</h3>', unsafe_allow_html=True)
+                st.progress(int(round(level, 0)))
+    with col3:
+        st.markdown(f'<h3 style="font-size:25px;text-align:center">Current likelihood of success:</h3>', unsafe_allow_html=True)
+        current_value = skill_levels["Likelihood of Success"]
+        st.markdown(f'<h3 style="font-size:50px;text-align:center">{round(current_value, 6)}%</h3>', unsafe_allow_html=True)
 
     st.divider()
 
@@ -225,7 +245,7 @@ def main():
     if save:
         checks[date] = check_values
         save_checks(checks)
-        # History is automatically updated, which is really weird
+        # History is automatically updated, which is really weird, therefore we make a deepcopy
         old_hist = copy.deepcopy(history)
         skill_levels = process_levels(skill_levels, check_values)
         save_skill_levels(skill_levels, date, old_hist)

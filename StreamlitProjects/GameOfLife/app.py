@@ -121,7 +121,14 @@ def level_up(text, key, skill_levels):
         f.write(key, skill_levels[key], text)
     return skill_levels
 
-def process_levels(skill_levels, checks):
+def get_skill_levels(date, history): 
+    keys = list(history.keys())
+    index = keys.index(date)
+    prev_date = keys[index - 1]
+    return history[prev_date]
+
+def process_levels(checks, date, history):
+    skill_levels = get_skill_levels(date, history)
     representative_key = ["Momentum", "Sleep", "Momentum", "Health", "Momentum", "Social Media Usage"]
     values = [(1, -1), (1, -4), (1, -1), (1, -2), (1, -1), (-1, 1)]
     for key, check, value in zip(representative_key, checks, values):
@@ -247,7 +254,7 @@ def main():
         save_checks(checks)
         # History is automatically updated, which is really weird, therefore we make a deepcopy
         old_hist = copy.deepcopy(history)
-        skill_levels = process_levels(skill_levels, check_values)
+        skill_levels = process_levels(check_values, date, history)
         save_skill_levels(skill_levels, date, old_hist)
         st.experimental_rerun()
 

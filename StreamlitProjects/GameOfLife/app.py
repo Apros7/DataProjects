@@ -129,11 +129,16 @@ def get_skill_levels(date, history):
 
 def process_levels(checks, date, history):
     skill_levels = get_skill_levels(date, history)
-    representative_key = ["Momentum", "Sleep", "Momentum", "Health", "Momentum", "Social Media Usage"]
-    values = [(1, -1), (1, -4), (1, -1), (1, -2), (1, -1), (-1, 1)]
-    for key, check, value in zip(representative_key, checks, values):
+    representative_key = ["Momentum", "Sleep", "Momentum", "Health", "Momentum", "Social Media Usage", "Health", "Health", "Momentum"]
+    values = [(1, -1), (1, -4), (1, -1), (1, -2), (1, -1), (-1, 1), (1, -1), (1, -1), (1, -1)]
+    update_main_goals = {2: (1, 1)} # values_index: (main_goal_index, number_to_add
+    main_goal_current_numbers = load_main_goal_number()
+    for i, (key, check, value) in enumerate(zip(representative_key, checks, values)):
         if check: skill_levels[key] += value[0]
         else: skill_levels[key] += value[1]
+        if i in update_main_goals and check: 
+            main_goal_current_numbers[update_main_goals[i][0]] += update_main_goals[i][1]
+            save_main_goal_number(main_goal_current_numbers)
     skill_levels = process_likelihood_of_success(skill_levels)
     return adjust_levels(skill_levels)
 
@@ -235,17 +240,19 @@ def main():
     st.write("Please select which habits you did today. This will impact your levels.")
 
     habits_lst = ["1 hour of work on grammatiktak", "8.5 hours in bed", "Wake up before 6 am", 
-                  "30 min of exercise", "2 hours of coding outside of school/word", "No social media before 6 pm"]
+                  "30 min of exercise", "2 hours of coding outside of school/word", "No social media before 6 pm",
+                  "2 x Tandtråd", "Vaske ansigt aften", "Op af seng 5 min efter ur"]
     habits = {habit: False for habit in habits_lst}
 
     if date in checks:
         habits = {habit: checks[date][i] for i, habit in enumerate(habits_lst)}
 
     check_values = []
-    col1, col2, col3 = st.columns(3)
-    columns = [col1, col2, col3, col1, col2, col3]
+    columns = st.columns(3)
     for i, habit in enumerate(habits):
-        with columns[i]:
+        column_index = i % 3
+        print(column_index)
+        with columns[column_index]:
             check_values.append(st.checkbox(habit, habits[habit]))
 
     save = st.button("Submit")

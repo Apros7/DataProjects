@@ -129,7 +129,7 @@ def get_skill_levels(date, history):
 
 def process_levels(checks, date, history):
     skill_levels = get_skill_levels(date, history)
-    representative_key = ["Momentum", "Sleep", "Momentum", "Health", "Momentum", "Social Media Usage", "Health", "Health", "Momentum"]
+    representative_key = ["Momentum", "Sleep", "Momentum", "Health", "Momentum", "Social Media Usage", "Health", "Momentum", "Momentum"]
     values = [(1, -1), (1, -4), (1, -1), (1, -2), (1, -1), (-1, 1), (1, -1), (1, -1), (1, -1)]
     update_main_goals = {2: (1, 1)} # values_index: (main_goal_index, number_to_add
     main_goal_current_numbers = load_main_goal_number()
@@ -143,8 +143,8 @@ def process_levels(checks, date, history):
     return adjust_levels(skill_levels)
 
 def process_likelihood_of_success(skill_levels):
-    average = skill_levels["Sleep"] + skill_levels["Health"] + skill_levels["Momentum"] + 100 - skill_levels["Social Media Usage"]
-    average /= 4
+    average = skill_levels["Sleep"] + skill_levels["Health"] + 3 * skill_levels["Momentum"] + 100 - skill_levels["Social Media Usage"]
+    average /= 6
     likelihood = (average ** 2) / (100)
     skill_levels["Likelihood of Success"] = likelihood
     return skill_levels
@@ -239,9 +239,9 @@ def main():
 
     st.write("Please select which habits you did today. This will impact your levels.")
 
-    habits_lst = ["1 hour of work on grammatiktak", "8.5 hours in bed", "Wake up before 6 am", 
-                  "30 min of exercise", "2 hours of coding outside of school/word", "No social media before 6 pm",
-                  "2 x Tandtråd", "Vaske ansigt aften", "Op af seng 5 min efter ur"]
+    habits_lst = ["1 hour of work on grammatiktak", "8.75 hours in bed", "Wake up before 6 am", 
+                  "30 min of exercise", "2 hours of coding outside of school/work", "No social media before 6 pm",
+                  "2 x Tandtråd + Vaske ansigt", "30 min læsning", "Op af seng 5 min efter ur"]
     habits = {habit: False for habit in habits_lst}
 
     if date in checks:
@@ -251,7 +251,6 @@ def main():
     columns = st.columns(3)
     for i, habit in enumerate(habits):
         column_index = i % 3
-        print(column_index)
         with columns[column_index]:
             check_values.append(st.checkbox(habit, habits[habit]))
 

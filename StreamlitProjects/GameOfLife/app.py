@@ -240,7 +240,7 @@ def main():
     st.write("Please select which habits you did today. This will impact your levels.")
 
     habits_lst = ["1 hour of work on grammatiktak", "8.75 hours in bed", "Wake up before 6 am", 
-                  "30 min of exercise", "2 hours of coding outside of school/work", "No social media before 6 pm",
+                  "30 min of exercise", "2 hours of coding outside of school/work", "Focused first hour of the day",
                   "2 x Tandtråd + Vaske ansigt", "30 min læsning", "Op af seng 5 min efter ur"]
     habits = {habit: False for habit in habits_lst}
 
